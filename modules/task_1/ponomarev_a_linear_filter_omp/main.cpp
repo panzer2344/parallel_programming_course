@@ -2,13 +2,14 @@
 // Copyright 2019 Ponomarev Alexey
 
 #include <stdio.h>
-#include <cstdlib>
+#include <stdlib.h>
 #include <iostream>
 #include <algorithm>
 #include <vector>
 #include <string>
 #include <ctime>
 #include <fstream>
+#include <math.h>
 
 
 // constants
@@ -48,9 +49,9 @@ Pixel** generateImage(int width, int height) {
     // init array
     for (int i = 0; i < height; i++) {
         for (int j = 0; j < width; j++) {
-            image[i][j].r = rand() % 255;
-            image[i][j].g = rand() % 255;
-            image[i][j].b = rand() % 255;
+            image[i][j].r = rand_r() % 255;
+            image[i][j].g = rand_r() % 255;
+            image[i][j].b = rand_r() % 255;
         }
     }
     return image;
@@ -67,10 +68,10 @@ double** generateGaussKernel(int radius, double sigma = DEFAULT_SIGMA) {
     }
 
     /* init coefficients */
-    //double k = 2.0 * radius * radius;
+    // double k = 2.0 * radius * radius;
     double squreSigma = sigma * sigma;
     double doulbeSquereSigma = squreSigma * 2;
-    //double k = MATH_PI * squreSigma;
+    // double k = MATH_PI * squreSigma;
     double norm = 0.0;
 
     /* summ processing */
@@ -87,7 +88,6 @@ double** generateGaussKernel(int radius, double sigma = DEFAULT_SIGMA) {
             kernel[u + radius][v + radius] /= norm;
         }
     }
-
     return kernel;
 }
 
@@ -120,7 +120,8 @@ bool isImageNull(Pixel** image, int imHeight) {
 
 
 // wrapper function for null image checking
-void checkIsImageNull(Pixel** image, int imHeight, const char* locationMessage = "", const char* errorMessage = IMAGE_NULL_ERROR) {
+void checkIsImageNull(Pixel** image, int imHeight, 
+    const char* locationMessage = "", const char* errorMessage = IMAGE_NULL_ERROR) {
     if (isImageNull(image, imHeight)) {
         std::cout << "*** " << errorMessage << " for " << locationMessage << std::endl;
     }
@@ -138,9 +139,9 @@ Pixel seqPixelFiltering(Pixel** genImage, int width, int height, double** kernel
     for (int u = -kerRadius; u <= kerRadius; u++) {
         for (int v = -kerRadius; v <= kerRadius; v++) {
             if (x + v >= 0 && x + v < width && y + u >= 0 && y + u < height) {
-                outPixel.r += (int)(kernel[u + kerRadius][v + kerRadius] * (double)genImage[y + u][x + v].r);
-                outPixel.g += (int)(kernel[u + kerRadius][v + kerRadius] * (double)genImage[y + u][x + v].g);
-                outPixel.b += (int)(kernel[u + kerRadius][v + kerRadius] * (double)genImage[y + u][x + v].b);
+                outPixel.r += static_cast<int>(kernel[u + kerRadius][v + kerRadius] * static_cast<double>(genImage[y + u][x + v].r));
+                outPixel.g += static_cast<int>(kernel[u + kerRadius][v + kerRadius] * static_cast<double>(genImage[y + u][x + v].g));
+                outPixel.b += static_cast<int>(kernel[u + kerRadius][v + kerRadius] * static_cast<double>(genImage[y + u][x + v].b));
             }
         }
     }
@@ -182,8 +183,7 @@ void tryDeleteImage(int height, Pixel** image, const char* imageName) {
     std::cout << "*** LOG: try deleting image with name = " << imageName << " ***" << std::endl;
     if (deleteImage(height, image)) {
         std::cout << "*** " << imageName << " successfully deleted ***" << std::endl;
-    }
-    else {
+    } else {
         std::cout << "*** error with deleting " << imageName << " ***" << std::endl;
     }
 }
@@ -192,8 +192,7 @@ void tryDeleteKernel(int radius, double** kernel) {
     std::cout << "*** LOG: try deleting kernel ***" << std::endl;
     if (deleteKernel(kernel, radius)) {
         std::cout << "*** kernel successfully deleted ***" << std::endl;
-    }
-    else {
+    } else {
         std::cout << "*** error with deleting kernel ***" << std::endl;
     }
 }
@@ -245,7 +244,7 @@ void printKernel(double **kernel, int radius) {
 // entry point
 int main(int argc, char* argv[]) {
     // define variables
-    Pixel **genImage = NULL; // image before filtering 
+    Pixel **genImage = NULL; // image before filtering
     Pixel **filteredImage = NULL; // image after filtering
     int imWidth = IMAGE_WIDTH; // image width
     int imHeight = IMAGE_HEIGHT; // image height
@@ -253,7 +252,7 @@ int main(int argc, char* argv[]) {
     double **kernel = NULL; // Gauss kernel
 
                             /* initialize random seed: */
-    srand((int)time(NULL));
+    srand(static_cast<int>(time(NULL)));
 
     genImage = generateImage(imWidth, imHeight);
     printImage(genImage, imWidth, imHeight);
