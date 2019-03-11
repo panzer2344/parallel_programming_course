@@ -16,11 +16,11 @@
 // constants
 const int IMAGE_WIDTH = 16;
 const int IMAGE_HEIGHT = 9;
-const int IMAGE_SIZE = IMAGE_WIDTH * IMAGE_WIDTH;
-const int IMAGE_COMPONENTS_COUNT = 3;
+// const int IMAGE_SIZE = IMAGE_WIDTH * IMAGE_WIDTH;
+// const int IMAGE_COMPONENTS_COUNT = 3;
 const char* GENERATED_IMAGE_NAME = "generated image";
 const char* FILTERD_IMAGE_NAME = "generated image";
-const double MATH_PI = 3.14159265359;
+// const double MATH_PI = 3.14159265359;
 const int KERNEL_RADIUS = 1;
 const char* KERNEL_NULL_ERROR = "ERROR: kernel is null";
 const char* KERNEL_ROW_NULL_ERROR = "ERROR: nullable kernel row#";
