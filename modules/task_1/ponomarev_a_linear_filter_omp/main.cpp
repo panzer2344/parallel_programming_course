@@ -3,13 +3,13 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <math.h>
 #include <iostream>
 #include <algorithm>
 #include <vector>
 #include <string>
 #include <ctime>
 #include <fstream>
-#include <math.h>
 
 
 // constants
@@ -120,7 +120,7 @@ bool isImageNull(Pixel** image, int imHeight) {
 
 
 // wrapper function for null image checking
-void checkIsImageNull(Pixel** image, int imHeight, 
+void checkIsImageNull(Pixel** image, int imHeight,
     const char* locationMessage = "", const char* errorMessage = IMAGE_NULL_ERROR) {
     if (isImageNull(image, imHeight)) {
         std::cout << "*** " << errorMessage << " for " << locationMessage << std::endl;
@@ -139,9 +139,12 @@ Pixel seqPixelFiltering(Pixel** genImage, int width, int height, double** kernel
     for (int u = -kerRadius; u <= kerRadius; u++) {
         for (int v = -kerRadius; v <= kerRadius; v++) {
             if (x + v >= 0 && x + v < width && y + u >= 0 && y + u < height) {
-                outPixel.r += static_cast<int>(kernel[u + kerRadius][v + kerRadius] * static_cast<double>(genImage[y + u][x + v].r));
-                outPixel.g += static_cast<int>(kernel[u + kerRadius][v + kerRadius] * static_cast<double>(genImage[y + u][x + v].g));
-                outPixel.b += static_cast<int>(kernel[u + kerRadius][v + kerRadius] * static_cast<double>(genImage[y + u][x + v].b));
+                outPixel.r += static_cast<int>(kernel[u + kerRadius][v + kerRadius] *
+                    static_cast<double>(genImage[y + u][x + v].r));
+                outPixel.g += static_cast<int>(kernel[u + kerRadius][v + kerRadius] *
+                    static_cast<double>(genImage[y + u][x + v].g));
+                outPixel.b += static_cast<int>(kernel[u + kerRadius][v + kerRadius] *
+                    static_cast<double>(genImage[y + u][x + v].b));
             }
         }
     }
@@ -241,17 +244,17 @@ void printKernel(double **kernel, int radius) {
 }
 
 
-// entry point
+/* entry point */
 int main(int argc, char* argv[]) {
     // define variables
-    Pixel **genImage = NULL; // image before filtering
-    Pixel **filteredImage = NULL; // image after filtering
-    int imWidth = IMAGE_WIDTH; // image width
-    int imHeight = IMAGE_HEIGHT; // image height
+    Pixel **genImage = NULL;  // image before filtering
+    Pixel **filteredImage = NULL;  // image after filtering
+    int imWidth = IMAGE_WIDTH;  // image width
+    int imHeight = IMAGE_HEIGHT;  // image height
     int kerRadius = KERNEL_RADIUS;
-    double **kernel = NULL; // Gauss kernel
+    double **kernel = NULL;  // Gauss kernel
 
-                            /* initialize random seed: */
+    /* initialize random seed: */
     srand(static_cast<int>(time(NULL)));
 
     genImage = generateImage(imWidth, imHeight);
