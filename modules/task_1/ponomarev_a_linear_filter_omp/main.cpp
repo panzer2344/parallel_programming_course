@@ -50,9 +50,9 @@ Pixel** generateImage(int width, int height) {
     // init array
     for (int i = 0; i < height; i++) {
         for (int j = 0; j < width; j++) {
-            image[i][j].r = rand() % 255;
-            image[i][j].g = rand() % 255;
-            image[i][j].b = rand() % 255;
+            image[i][j].r = std::rand() % 255;
+            image[i][j].g = std::rand() % 255;
+            image[i][j].b = std::rand() % 255;
         }
     }
     return image;
