@@ -1,4 +1,4 @@
-// A sequential version of linear filtration algorithm with Gauss kernel
+﻿// A sequential version of linear filtration algorithm with Gauss kernel
 // Copyright 2019 Ponomarev Alexey
 
 #include <stdio.h>
@@ -11,6 +11,14 @@
 #include <ctime>
 #include <fstream>
 #include <random>
+
+
+// for image output
+#include <opencv2\imgcodecs.hpp>
+#include <opencv\cv.hpp>
+//#include <opencv2/core/core.hpp>
+//#include <opencv2/highgui/highgui.hpp>
+using namespace cv;
 
 
 // constants
@@ -244,6 +252,46 @@ void printKernel(double **kernel, int radius) {
     std::cout << std::endl;
 }
 
+Pixel** pixelArrayFromMat(const Mat& mat) {
+    std::cout << "start" << std::endl;
+    Pixel** image = allocateImageMemory(mat.cols, mat.rows);
+    std::cout << "start1" << std::endl;
+    for (int y = 0; y < mat.rows; y++) {
+        for (int x = 0; x < mat.cols; x++) {
+            std::cout << x << ", " << y << std::endl;
+            Vec3b vecPixel = mat.at<Vec3b>(y, x);
+            Pixel pixel = {
+                vecPixel[2],
+                vecPixel[1],
+                vecPixel[0] 
+            };
+        }
+    }
+    return image;
+}
+
+Mat matFromPixelArray(Pixel** image, int width, int height) {
+    Mat mat = Mat(height, width, CV_32SC1);
+    for (int y = 0; y < height; y++) {
+        for (int x = 0; x < width; x++) {
+            Pixel pixel = image[y][x];
+            Vec3b vecPixel;
+            vecPixel[0] = pixel.b;
+            vecPixel[1] = pixel.g;
+            vecPixel[2] = pixel.r;
+            mat.at<Vec3b>(y, x) = vecPixel;
+        }
+    }
+    return mat;
+}
+
+
+// cvShow
+void cvShow(const char* window_name, const Mat& image) {
+    namedWindow(window_name, CV_WINDOW_AUTOSIZE);
+    imshow(window_name, image);
+}
+
 
 /* entry point */
 int main(int argc, char* argv[]) {
@@ -255,10 +303,25 @@ int main(int argc, char* argv[]) {
     int kerRadius = KERNEL_RADIUS;
     double **kernel = NULL;  // Gauss kernel
 
-    /* initialize random seed: */
-    srand(static_cast<int>(time(NULL)));
+    // for output image
+    Mat imageMat, filterMat;
 
-    genImage = generateImage(imWidth, imHeight);
+    /* initialize random seed: */
+    //srand(static_cast<int>(time(NULL)));
+
+    imageMat = cvarrToMat(cvLoadImage("azamat.jpg", CV_LOAD_IMAGE_COLOR));//imread("azamat.jpg", CV_LOAD_IMAGE_COLOR);
+    std::cout << "cvt" << std::endl;
+    cvtColor(imageMat, imageMat, COLOR_BGR2GRAY);
+    std::cout << "show" << std::endl;
+    cvShow("image", imageMat);
+    std::cout << "after show" << std::endl;
+    genImage = pixelArrayFromMat(imageMat);
+    std::cout << "after show1" << std::endl;
+    filterMat = matFromPixelArray(genImage, imageMat.cols, imageMat.rows);
+    cvShow("filtered", filterMat);
+
+
+    /*genImage = generateImage(imWidth, imHeight);
     printImage(genImage, imWidth, imHeight);
 
     kernel = generateGaussKernel(kerRadius);
@@ -269,7 +332,7 @@ int main(int argc, char* argv[]) {
 
     tryDeleteImage(imHeight, genImage, GENERATED_IMAGE_NAME);
     tryDeleteImage(imHeight, filteredImage, FILTERD_IMAGE_NAME);
-    tryDeleteKernel(kerRadius, kernel);
+    tryDeleteKernel(kerRadius, kernel);*/
 
     return 0;
 }
