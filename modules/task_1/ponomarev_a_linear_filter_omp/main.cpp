@@ -29,7 +29,7 @@ const int IMAGE_HEIGHT = 9;
 const char* GENERATED_IMAGE_NAME = "generated image";
 const char* FILTERD_IMAGE_NAME = "generated image";
 // const double MATH_PI = 3.14159265359;
-const int KERNEL_RADIUS = 1;
+const int KERNEL_RADIUS = 3;
 const char* KERNEL_NULL_ERROR = "ERROR: kernel is null";
 const char* KERNEL_ROW_NULL_ERROR = "ERROR: nullable kernel row#";
 const char* ALLOCATING_IMAGE_MEMORY_ERROR = "ERROR: error with allocating memory for image";
@@ -258,27 +258,32 @@ Pixel** pixelArrayFromMat(const Mat& mat) {
     std::cout << "start1" << std::endl;
     for (int y = 0; y < mat.rows; y++) {
         for (int x = 0; x < mat.cols; x++) {
-            std::cout << x << ", " << y << std::endl;
+            //std::cout << x << ", " << y << std::endl;
             Vec3b vecPixel = mat.at<Vec3b>(y, x);
-            Pixel pixel = {
+            Pixel pixel;
+            pixel.r = vecPixel[2];
+            pixel.g = vecPixel[1];
+            pixel.b = vecPixel[0];
+            /*Pixel pixel = {
                 vecPixel[2],
                 vecPixel[1],
                 vecPixel[0] 
-            };
+            };*/
+            image[y][x] = pixel;
         }
     }
     return image;
 }
 
-Mat matFromPixelArray(Pixel** image, int width, int height) {
-    Mat mat = Mat(height, width, CV_32SC1);
+Mat matFromPixelArray(Pixel** image, int width, int height, unsigned int type) {
+    Mat mat = Mat(height, width, type);
     for (int y = 0; y < height; y++) {
         for (int x = 0; x < width; x++) {
             Pixel pixel = image[y][x];
             Vec3b vecPixel;
-            vecPixel[0] = pixel.b;
-            vecPixel[1] = pixel.g;
-            vecPixel[2] = pixel.r;
+            vecPixel[0] = (unsigned char) pixel.b;
+            vecPixel[1] = (unsigned char) pixel.g;
+            vecPixel[2] = (unsigned char) pixel.r;
             mat.at<Vec3b>(y, x) = vecPixel;
         }
     }
@@ -302,38 +307,36 @@ int main(int argc, char* argv[]) {
     int imHeight = IMAGE_HEIGHT;  // image height
     int kerRadius = KERNEL_RADIUS;
     double **kernel = NULL;  // Gauss kernel
+    int matType = 0;
 
     // for output image
     Mat imageMat, filterMat;
+    
 
     /* initialize random seed: */
-    //srand(static_cast<int>(time(NULL)));
+    srand(static_cast<int>(time(NULL)));
 
-    imageMat = cvarrToMat(cvLoadImage("azamat.jpg", CV_LOAD_IMAGE_COLOR));//imread("azamat.jpg", CV_LOAD_IMAGE_COLOR);
-    std::cout << "cvt" << std::endl;
-    cvtColor(imageMat, imageMat, COLOR_BGR2GRAY);
-    std::cout << "show" << std::endl;
+    imageMat = cvarrToMat(cvLoadImage("azamat.jpg", CV_LOAD_IMAGE_COLOR));
+    matType = imageMat.type();
+    imWidth = imageMat.cols;
+    imHeight = imageMat.rows;
+
     cvShow("image", imageMat);
-    std::cout << "after show" << std::endl;
+    cvWaitKey(0);
+
     genImage = pixelArrayFromMat(imageMat);
-    std::cout << "after show1" << std::endl;
-    filterMat = matFromPixelArray(genImage, imageMat.cols, imageMat.rows);
-    cvShow("filtered", filterMat);
-
-
-    /*genImage = generateImage(imWidth, imHeight);
-    printImage(genImage, imWidth, imHeight);
-
     kernel = generateGaussKernel(kerRadius);
-    printKernel(kernel, kerRadius);
 
     filteredImage = seqFilter(genImage, imWidth, imHeight, kernel, kerRadius);
-    printImage(filteredImage, imWidth, imHeight);
+    filterMat = matFromPixelArray(filteredImage, imWidth, imHeight, matType);
+
+    cvShow("filtered", filterMat);
+    cvWaitKey(0);
 
     tryDeleteImage(imHeight, genImage, GENERATED_IMAGE_NAME);
     tryDeleteImage(imHeight, filteredImage, FILTERD_IMAGE_NAME);
-    tryDeleteKernel(kerRadius, kernel);*/
-
+    tryDeleteKernel(kerRadius, kernel);
+    
     return 0;
 }
 
