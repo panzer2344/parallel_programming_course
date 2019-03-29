@@ -11,6 +11,8 @@
 #include <ctime>
 #include <fstream>
 #include <random>
+#include <array>
+#include <algorithm>
 
 
 // for image output
@@ -35,6 +37,7 @@ const char* KERNEL_ROW_NULL_ERROR = "ERROR: nullable kernel row#";
 const char* ALLOCATING_IMAGE_MEMORY_ERROR = "ERROR: error with allocating memory for image";
 const char* IMAGE_NULL_ERROR = "ERROR: image is null";
 const double DEFAULT_SIGMA = 0.5;
+const char* DEFAULT_FILE = "azamat.jpg";
 
 struct Pixel {
     int r;
@@ -297,6 +300,54 @@ void cvShow(const char* window_name, const Mat& image) {
     imshow(window_name, image);
 }
 
+std::string findArg(const std::string& argStr, const std::string& templ) {
+    size_t from = argStr.find(templ);
+    if (from != std::string::npos) {
+        std::string founded =
+            argStr.substr(from + std::strlen(templ.c_str()), argStr.size() - from - templ.size() + 1);
+        std::cout
+            << "found " + templ.substr(0, templ.size() - 1) + ": "
+            << founded
+            << std::endl;
+        return founded;
+    }
+    return "";
+}
+
+char* strCpy(const char* s) {
+    size_t size = strlen(s);
+    char* s1 = new char[size];
+    for (int i = 0; i < size; i++) {
+        s1[i] = s[i];
+    }
+    return s1;
+}
+
+void takeArguments(int& _kerRadius, double& _sigma, char **_fileName, int _argc, char** _argv) {
+    std::cout << "argc = " << _argc << std::endl;
+    for (int i = 0; i < _argc; i++) {
+        std::cout << "argv[" << i << "] = " << _argv[i] << std::endl;
+        //std::replace
+        size_t argLen = strlen(_argv[i]);
+        //std::vector<char> argVec(_argv, _argv + argLen);
+        std::string argStr = std::string(_argv[i]);
+        //std::string::iterator strIterFile = std::find(argStr.begin(), argStr.end(), "file=");
+        std::string fileName = findArg(argStr, "file=");
+        if (fileName != "") {
+            //strcpy_s(_fileName, fileName.size(), fileName.c_str());
+            *_fileName = strCpy(fileName.c_str());
+        }
+        std::string sigmaStr = findArg(argStr, "sigma=");
+        if (sigmaStr != "") {
+            _sigma = std::stod(sigmaStr);
+        }
+        std::string kerRadiusStr = findArg(argStr, "radius=");
+        if (kerRadiusStr != "") {
+            _kerRadius = std::stoi(kerRadiusStr);
+        }
+    }
+}
+
 
 /* entry point */
 int main(int argc, char* argv[]) {
@@ -308,6 +359,8 @@ int main(int argc, char* argv[]) {
     int kerRadius = KERNEL_RADIUS;
     double **kernel = NULL;  // Gauss kernel
     int matType = 0;
+    double sigma = DEFAULT_SIGMA; // filter sigma parameter
+    char* fileName = strCpy(DEFAULT_FILE); // reading file name
 
     // for output image
     Mat imageMat, filterMat;
@@ -316,7 +369,9 @@ int main(int argc, char* argv[]) {
     /* initialize random seed: */
     srand(static_cast<int>(time(NULL)));
 
-    imageMat = cvarrToMat(cvLoadImage("azamat.jpg", CV_LOAD_IMAGE_COLOR));
+    takeArguments(kerRadius, sigma, &fileName, argc, argv);
+
+    imageMat = cvarrToMat(cvLoadImage(DEFAULT_FILE, CV_LOAD_IMAGE_COLOR));
     matType = imageMat.type();
     imWidth = imageMat.cols;
     imHeight = imageMat.rows;
@@ -325,7 +380,7 @@ int main(int argc, char* argv[]) {
     cvWaitKey(0);
 
     genImage = pixelArrayFromMat(imageMat);
-    kernel = generateGaussKernel(kerRadius);
+    kernel = generateGaussKernel(kerRadius, sigma);
 
     filteredImage = seqFilter(genImage, imWidth, imHeight, kernel, kerRadius);
     filterMat = matFromPixelArray(filteredImage, imWidth, imHeight, matType);
@@ -336,6 +391,8 @@ int main(int argc, char* argv[]) {
     tryDeleteImage(imHeight, genImage, GENERATED_IMAGE_NAME);
     tryDeleteImage(imHeight, filteredImage, FILTERD_IMAGE_NAME);
     tryDeleteKernel(kerRadius, kernel);
+
+    cvWaitKey(0);
     
     return 0;
 }
