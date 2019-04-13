@@ -398,15 +398,15 @@ int main(int argc, char* argv[]) {
     /* define extensional variables for different kernel radius */
 
     /* radius 7 */
-    int kerRadius7 = 7;
-    double **kernel7 = NULL;
-    Pixel **filteredImage7 = NULL;
+    // int kerRadius7 = 7;
+    // double **kernel7 = NULL;
+    // Pixel **filteredImage7 = NULL;
     // Mat filterMat7;
 
     /* radius 14 */
-    int kerRadius14 = 14;
-    double **kernel14 = NULL;
-    Pixel **filteredImage14 = NULL;
+    // int kerRadius14 = 14;
+    // double **kernel14 = NULL;
+    // Pixel **filteredImage14 = NULL;
     // Mat filterMat14;
 
     // for output image
@@ -433,8 +433,8 @@ int main(int argc, char* argv[]) {
 
     kernel = generateGaussKernel(kerRadius, sigma);
 
-    kernel7 = generateGaussKernel(kerRadius7, sigma);
-    kernel14 = generateGaussKernel(kerRadius14, sigma);
+    // kernel7 = generateGaussKernel(kerRadius7, sigma);
+    // kernel14 = generateGaussKernel(kerRadius14, sigma);
 
     // printKernel(kernel, kerRadius);
     // printKernel(kernel7, kerRadius7);
@@ -484,12 +484,12 @@ int main(int argc, char* argv[]) {
     tryDeleteKernel(kerRadius, kernel);
 
     /* deleting extensional kernels */
-    tryDeleteKernel(kerRadius7, kernel7);  // radius 7
-    tryDeleteKernel(kerRadius14, kernel14);  // radius 14
+    // tryDeleteKernel(kerRadius7, kernel7);  // radius 7
+    // tryDeleteKernel(kerRadius14, kernel14);  // radius 14
 
     // cvWaitKey(0);
 
-    system("pause");
+    // system("pause");
 
     return 0;
 }
