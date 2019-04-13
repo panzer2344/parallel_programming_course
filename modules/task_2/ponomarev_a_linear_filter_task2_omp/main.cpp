@@ -18,28 +18,29 @@
 
 // for image output
 // #include <opencv2\imgcodecs.hpp>
-// #include <opencv\cv.hpp>
-// #include <opencv2/core/core.hpp>
-// #include <opencv2/highgui/highgui.hpp>
-// using namespace cv;
+#include <opencv\cv.hpp>
+#include <opencv2/core/core.hpp>
+#include <opencv2/highgui/highgui.hpp>
+using namespace cv;
 
 
 // constants
-const int IMAGE_WIDTH = 3200;
-const int IMAGE_HEIGHT = 1800;
+const int IMAGE_WIDTH = 6400;
+const int IMAGE_HEIGHT = 3600;
 // const int IMAGE_SIZE = IMAGE_WIDTH * IMAGE_WIDTH;
 // const int IMAGE_COMPONENTS_COUNT = 3;
 const char* GENERATED_IMAGE_NAME = "generated image";
 const char* FILTERD_IMAGE_NAME = "generated image";
 const double MATH_PI = 3.14159265359;
-const int KERNEL_RADIUS = 1;
+const int KERNEL_RADIUS = 5;
 const char* KERNEL_NULL_ERROR = "ERROR: kernel is null";
 const char* KERNEL_ROW_NULL_ERROR = "ERROR: nullable kernel row#";
 const char* ALLOCATING_IMAGE_MEMORY_ERROR = "ERROR: error with allocating memory for image";
 const char* IMAGE_NULL_ERROR = "ERROR: image is null";
 const double DEFAULT_SIGMA = 1;
 // const char* DEFAULT_FILE = "azamat.jpg";
-const char* DEFAULT_FILE = "lines.jpg";
+// const char* DEFAULT_FILE = "lines.jpg";
+const char* DEFAULT_FILE = "D:\\Git\\parallel_programming_course\\big_image.jpg";
 
 struct Pixel {
     int r;
@@ -83,7 +84,7 @@ double** generateGaussKernel(int radius, double sigma = DEFAULT_SIGMA) {
 
     /* init coefficients */
     double k = 2 * radius * radius;
-    double k_pi = MATH_PI * k;
+    double k_pi = sqrt(2.0 * MATH_PI) * k / 2.0; // original formula makes image too dark
 
     /* summ processing */
     for (int u = -radius; u <= radius; u++) {
@@ -166,19 +167,6 @@ Pixel seqPixelFiltering(Pixel** genImage, int width, int height, double** kernel
     outPixel.r = clamp(static_cast<int>(r));
     outPixel.g = clamp(static_cast<int>(g));
     outPixel.b = clamp(static_cast<int>(b));
-
-    /*for (int u = -kerRadius; u <= kerRadius; u++) {
-        for (int v = -kerRadius; v <= kerRadius; v++) {
-            if (x + v >= 0 && x + v < width && y + u >= 0 && y + u < height) {
-                outPixel.r += static_cast<int>(kernel[u + kerRadius][v + kerRadius] *
-                    static_cast<double>(genImage[y + u][x + v].r));
-                outPixel.g += static_cast<int>(kernel[u + kerRadius][v + kerRadius] *
-                    static_cast<double>(genImage[y + u][x + v].g));
-                outPixel.b += static_cast<int>(kernel[u + kerRadius][v + kerRadius] *
-                    static_cast<double>(genImage[y + u][x + v].b));
-            }
-        }
-    }*/
 
     return outPixel;
 }
@@ -292,7 +280,7 @@ void printKernel(double **kernel, int radius) {
     std::cout << std::endl;
 }
 
-/* Pixel** pixelArrayFromMat(const Mat& mat) {
+Pixel** pixelArrayFromMat(const Mat& mat) {
     std::cout << "start" << std::endl;
     Pixel** image = allocateImageMemory(mat.cols, mat.rows);
     std::cout << "start1" << std::endl;
@@ -309,9 +297,9 @@ void printKernel(double **kernel, int radius) {
         }
     }
     return image;
-} */
+} 
 
-/* Mat matFromPixelArray(Pixel** image, int width, int height, unsigned int type) {
+ Mat matFromPixelArray(Pixel** image, int width, int height, unsigned int type) {
     Mat mat = Mat(height, width, type);
     for (int y = 0; y < height; y++) {
         for (int x = 0; x < width; x++) {
@@ -324,14 +312,18 @@ void printKernel(double **kernel, int radius) {
         }
     }
     return mat;
-} */
+} 
 
 
 // cvShow
-/* void cvShow(const char* window_name, const Mat& image) {
+ void cvShow(const char* window_name, const Mat& image) {
+    Mat resizedImage;
+    size_t newWidth = 1200;
+    size_t newHeight = static_cast<size_t>(newWidth * static_cast<double>(image.rows) / static_cast<double>(image.cols));
+    resize(image, resizedImage, Size(newWidth, newHeight));
     namedWindow(window_name, CV_WINDOW_AUTOSIZE);
-    imshow(window_name, image);
-} */
+    imshow(window_name, resizedImage);
+} 
 
 std::string findArg(const std::string& argStr, const std::string& templ) {
     size_t from = argStr.find(templ);
@@ -387,6 +379,7 @@ int main(int argc, char* argv[]) {
     // define variables
     Pixel **genImage = NULL;  // image before filtering
     Pixel **filteredImage = NULL;  // image after filtering
+    Pixel **filteredImagePar = NULL;
     int imWidth = IMAGE_WIDTH;  // image width
     int imHeight = IMAGE_HEIGHT;  // image height
     int kerRadius = KERNEL_RADIUS;
@@ -398,19 +391,20 @@ int main(int argc, char* argv[]) {
     /* define extensional variables for different kernel radius */
 
     /* radius 7 */
-    int kerRadius7 = 7;
-    double **kernel7 = NULL;
-    Pixel **filteredImage7 = NULL;
+    // int kerRadius7 = 7;
+    // double **kernel7 = NULL;
+    // Pixel **filteredImage7 = NULL;
     // Mat filterMat7;
 
     /* radius 14 */
-    int kerRadius14 = 14;
-    double **kernel14 = NULL;
-    Pixel **filteredImage14 = NULL;
+    // int kerRadius14 = 14;
+    // double **kernel14 = NULL;
+    // Pixel **filteredImage14 = NULL;
     // Mat filterMat14;
 
     // for output image
-    // Mat imageMat, filterMat;
+    Mat imageMat, filterMat;
+    Mat filterMatPar;
 
 
     /* initialize random seed: */
@@ -420,21 +414,21 @@ int main(int argc, char* argv[]) {
     sigma = DEFAULT_SIGMA;  // for tests
     kerRadius = KERNEL_RADIUS;  // for tests
 
-    // imageMat = cvarrToMat(cvLoadImage(DEFAULT_FILE, CV_LOAD_IMAGE_COLOR));
-    // matType = imageMat.type();
-    // imWidth = imageMat.cols;
-    // imHeight = imageMat.rows;
+    imageMat = cvarrToMat(cvLoadImage(DEFAULT_FILE, CV_LOAD_IMAGE_COLOR));
+    matType = imageMat.type();
+    imWidth = imageMat.cols;
+    imHeight = imageMat.rows;
 
-    // cvShow("image", imageMat);
+    cvShow("image", imageMat);
     // cvWaitKey(0);
 
-    // genImage = pixelArrayFromMat(imageMat);
-    genImage = generateImage(imWidth, imHeight);
+    genImage = pixelArrayFromMat(imageMat);
+    // genImage = generateImage(imWidth, imHeight);
 
     kernel = generateGaussKernel(kerRadius, sigma);
 
-    kernel7 = generateGaussKernel(kerRadius7, sigma);
-    kernel14 = generateGaussKernel(kerRadius14, sigma);
+    // kernel7 = generateGaussKernel(kerRadius7, sigma);
+    // kernel14 = generateGaussKernel(kerRadius14, sigma);
 
     // printKernel(kernel, kerRadius);
     // printKernel(kernel7, kerRadius7);
@@ -443,11 +437,12 @@ int main(int argc, char* argv[]) {
     double startTimeSeq = omp_get_wtime();
     filteredImage = seqFilter(genImage, imWidth, imHeight, kernel, kerRadius);
     std::cout << "Elapsed time for seq version = " << omp_get_wtime() - startTimeSeq << std::endl;
-    // filterMat = matFromPixelArray(filteredImage, imWidth, imHeight, matType);
+    filterMat = matFromPixelArray(filteredImage, imWidth, imHeight, matType);
 
     double startTimePar = omp_get_wtime();
-    filteredImage = parFilter(genImage, imWidth, imHeight, kernel, kerRadius, 8);
+    filteredImagePar = parFilter(genImage, imWidth, imHeight, kernel, kerRadius, 8);
     std::cout << "Elapsed time for par version = " << omp_get_wtime() - startTimePar << std::endl;
+    filterMatPar = matFromPixelArray(filteredImagePar, imWidth, imHeight, matType);
 
     // filteredImage7 = seqFilter(genImage, imWidth, imHeight, kernel7, kerRadius7);
     // filterMat7 = matFromPixelArray(filteredImage7, imWidth, imHeight, matType);
@@ -455,7 +450,10 @@ int main(int argc, char* argv[]) {
     // filteredImage14 = seqFilter(genImage, imWidth, imHeight, kernel14, kerRadius14);
     // filterMat14 = matFromPixelArray(filteredImage14, imWidth, imHeight, matType);
 
-    // cvShow("filtered(radius=" + kerRadius, filterMat);
+    cvShow("sequence filtered( radius=" + kerRadius, filterMat);
+    // cvWaitKey(0);
+
+    cvShow("parallel filtered( radius=" + kerRadius, filterMatPar);
     // cvWaitKey(0);
 
     // cvShow("filtered(radius=" + kerRadius7, filterMat7);
@@ -469,27 +467,27 @@ int main(int argc, char* argv[]) {
     tryDeleteImage(imHeight, filteredImage, FILTERD_IMAGE_NAME);
 
     /* deleting extensional images*/
-    // tryDeleteImage(
-    //      imHeight,
-    //      filteredImage7,
-    //      (std::string(FILTERD_IMAGE_NAME) + " with radius 7").c_str()
-    //  ); // radius 7
-    // tryDeleteImage(
-    //        imHeight,
-    //        filteredImage14,
-    //        (std::string(FILTERD_IMAGE_NAME) + " with radius 14").c_str()
-    //    ); // radius 14
+    //tryDeleteImage(
+    //     imHeight,
+    //     filteredImage7,
+    //     (std::string(FILTERD_IMAGE_NAME) + " with radius 7").c_str()
+    //); // radius 7
+    //tryDeleteImage(
+    //       imHeight,
+    //       filteredImage14,
+    //       (std::string(FILTERD_IMAGE_NAME) + " with radius 14").c_str()
+    //); // radius 14
 
     /* deleting main kernel */
     tryDeleteKernel(kerRadius, kernel);
 
     /* deleting extensional kernels */
-    tryDeleteKernel(kerRadius7, kernel7);  // radius 7
-    tryDeleteKernel(kerRadius14, kernel14);  // radius 14
+    // tryDeleteKernel(kerRadius7, kernel7);  // radius 7
+    // tryDeleteKernel(kerRadius14, kernel14);  // radius 14
 
-    // cvWaitKey(0);
+    cvWaitKey(0);
 
-    system("pause");
+    //system("pause");
 
     return 0;
 }
