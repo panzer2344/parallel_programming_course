@@ -13,7 +13,7 @@
 #include <fstream>
 #include <random>
 #include <array>
-#include <algorithm>
+#include <cstring>
 
 
 // for image output
@@ -38,7 +38,7 @@ const char* KERNEL_ROW_NULL_ERROR = "ERROR: nullable kernel row#";
 const char* ALLOCATING_IMAGE_MEMORY_ERROR = "ERROR: error with allocating memory for image";
 const char* IMAGE_NULL_ERROR = "ERROR: image is null";
 const double DEFAULT_SIGMA = 1;
-//const char* DEFAULT_FILE = "azamat.jpg";
+// const char* DEFAULT_FILE = "azamat.jpg";
 const char* DEFAULT_FILE = "lines.jpg";
 
 struct Pixel {
@@ -88,7 +88,7 @@ double** generateGaussKernel(int radius, double sigma = DEFAULT_SIGMA) {
     /* summ processing */
     for (int u = -radius; u <= radius; u++) {
         for (int v = -radius; v <= radius; v++) {
-            kernel[u + radius][v + radius] = exp(-(u * u + v * v) / k); // now  without sigma
+            kernel[u + radius][v + radius] = exp(-(u * u + v * v) / k);  // now  without sigma
             kernel[u + radius][v + radius] /= k_pi;
         }
     }
@@ -337,7 +337,7 @@ std::string findArg(const std::string& argStr, const std::string& templ) {
     size_t from = argStr.find(templ);
     if (from != std::string::npos) {
         std::string founded =
-            argStr.substr(from + std::strlen(templ.c_str()), argStr.size() - from - templ.size() + 1);
+            argStr.substr(from + strlen(templ.c_str()), argStr.size() - from - templ.size() + 1);
         std::cout
             << "found " + templ.substr(0, templ.size() - 1) + ": "
             << founded
@@ -356,27 +356,27 @@ char* strCpy(const char* s) {
     return s1;
 }
 
-void takeArguments(int& _kerRadius, double& _sigma, char **_fileName, int _argc, char** _argv) {
+void takeArguments(int* _kerRadius, double* _sigma, char **_fileName, int _argc, char** _argv) {
     std::cout << "argc = " << _argc << std::endl;
     for (int i = 0; i < _argc; i++) {
         std::cout << "argv[" << i << "] = " << _argv[i] << std::endl;
-        //std::replace
-        size_t argLen = strlen(_argv[i]);
-        //std::vector<char> argVec(_argv, _argv + argLen);
+        // std::replace
+        // size_t argLen = strlen(_argv[i]);
+        // std::vector<char> argVec(_argv, _argv + argLen);
         std::string argStr = std::string(_argv[i]);
-        //std::string::iterator strIterFile = std::find(argStr.begin(), argStr.end(), "file=");
+        // std::string::iterator strIterFile = std::find(argStr.begin(), argStr.end(), "file=");
         std::string fileName = findArg(argStr, "file=");
         if (fileName != "") {
-            //strcpy_s(_fileName, fileName.size(), fileName.c_str());
+            // strcpy_s(_fileName, fileName.size(), fileName.c_str());
             *_fileName = strCpy(fileName.c_str());
         }
         std::string sigmaStr = findArg(argStr, "sigma=");
         if (sigmaStr != "") {
-            _sigma = std::stod(sigmaStr);
+            *_sigma = std::stod(sigmaStr);
         }
         std::string kerRadiusStr = findArg(argStr, "radius=");
         if (kerRadiusStr != "") {
-            _kerRadius = std::stoi(kerRadiusStr);
+            *_kerRadius = std::stoi(kerRadiusStr);
         }
     }
 }
@@ -392,11 +392,11 @@ int main(int argc, char* argv[]) {
     int kerRadius = KERNEL_RADIUS;
     double **kernel = NULL;  // Gauss kernel
     int matType = 0;
-    double sigma = DEFAULT_SIGMA; // filter sigma parameter
-    char* fileName = strCpy(DEFAULT_FILE); // reading file name
+    double sigma = DEFAULT_SIGMA;  // filter sigma parameter
+    char* fileName = strCpy(DEFAULT_FILE);  // reading file name
 
     /* define extensional variables for different kernel radius */
-    
+
     /* radius 7 */
     int kerRadius7 = 7;
     double **kernel7 = NULL;
@@ -411,14 +411,14 @@ int main(int argc, char* argv[]) {
 
     // for output image
     // Mat imageMat, filterMat;
-    
+
 
     /* initialize random seed: */
     srand(static_cast<int>(time(NULL)));
 
-    takeArguments(kerRadius, sigma, &fileName, argc, argv);
-    sigma = DEFAULT_SIGMA; // for tests
-    kerRadius = KERNEL_RADIUS; // for tests
+    takeArguments(&kerRadius, &sigma, &fileName, argc, argv);
+    sigma = DEFAULT_SIGMA;  // for tests
+    kerRadius = KERNEL_RADIUS;  // for tests
 
     // imageMat = cvarrToMat(cvLoadImage(DEFAULT_FILE, CV_LOAD_IMAGE_COLOR));
     // matType = imageMat.type();
@@ -432,7 +432,7 @@ int main(int argc, char* argv[]) {
     genImage = generateImage(imWidth, imHeight);
 
     kernel = generateGaussKernel(kerRadius, sigma);
-    
+
     kernel7 = generateGaussKernel(kerRadius7, sigma);
     kernel14 = generateGaussKernel(kerRadius14, sigma);
 
@@ -456,33 +456,41 @@ int main(int argc, char* argv[]) {
     // filterMat14 = matFromPixelArray(filteredImage14, imWidth, imHeight, matType);
 
     // cvShow("filtered(radius=" + kerRadius, filterMat);
-    //cvWaitKey(0);
-    
+    // cvWaitKey(0);
+
     // cvShow("filtered(radius=" + kerRadius7, filterMat7);
-    //cvWaitKey(0);
+    // cvWaitKey(0);
 
     // cvShow("filtered(radius=" + kerRadius14, filterMat14);
-    //cvWaitKey(0);
+    // cvWaitKey(0);
 
     /* deleting main image */
     tryDeleteImage(imHeight, genImage, GENERATED_IMAGE_NAME);
     tryDeleteImage(imHeight, filteredImage, FILTERD_IMAGE_NAME);
 
     /* deleting extensional images*/
-    // tryDeleteImage(imHeight, filteredImage7, (std::string(FILTERD_IMAGE_NAME) + " with radius 7").c_str()); // radius 7
-    // tryDeleteImage(imHeight, filteredImage14, (std::string(FILTERD_IMAGE_NAME) + " with radius 14").c_str()); // radius 14
+    // tryDeleteImage(
+    //      imHeight,
+    //      filteredImage7,
+    //      (std::string(FILTERD_IMAGE_NAME) + " with radius 7").c_str()
+    //  ); // radius 7
+    // tryDeleteImage(
+    //        imHeight,
+    //        filteredImage14,
+    //        (std::string(FILTERD_IMAGE_NAME) + " with radius 14").c_str()
+    //    ); // radius 14
 
     /* deleting main kernel */
     tryDeleteKernel(kerRadius, kernel);
 
     /* deleting extensional kernels */
-    tryDeleteKernel(kerRadius7, kernel7); // radius 7
-    tryDeleteKernel(kerRadius14, kernel14); // radius 14
+    tryDeleteKernel(kerRadius7, kernel7);  // radius 7
+    tryDeleteKernel(kerRadius14, kernel14);  // radius 14
 
     // cvWaitKey(0);
 
     system("pause");
-    
+
     return 0;
 }
 
