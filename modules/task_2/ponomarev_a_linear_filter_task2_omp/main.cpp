@@ -391,7 +391,7 @@ int main(int argc, char* argv[]) {
     int imHeight = IMAGE_HEIGHT;  // image height
     int kerRadius = KERNEL_RADIUS;
     double **kernel = NULL;  // Gauss kernel
-    int matType = 0;
+    // int matType = 0;
     double sigma = DEFAULT_SIGMA;  // filter sigma parameter
     char* fileName = strCpy(DEFAULT_FILE);  // reading file name
 
