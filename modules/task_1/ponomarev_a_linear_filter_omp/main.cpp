@@ -18,6 +18,7 @@
 #include <fstream>
 #include <random>
 #include <array>
+#include <cstring>
 
 // using namespace cv;
 
@@ -81,7 +82,6 @@ double** generateGaussKernel(int radius, double sigma = DEFAULT_SIGMA) {
     /* init coefficients */
     double k = 2 * radius * radius;
     double k_pi = MATH_PI * k;
-    double norm = 0.0;
 
     /* summ processing */
     for (int u = -radius; u <= radius; u++) {
@@ -303,7 +303,7 @@ std::string findArg(const std::string& argStr, const std::string& templ) {
     size_t from = argStr.find(templ);
     if (from != std::string::npos) {
         std::string founded =
-            argStr.substr(from + std::strlen(templ.c_str()), argStr.size() - from - templ.size() + 1);
+            argStr.substr(from + strlen(templ.c_str()), argStr.size() - from - templ.size() + 1);
         std::cout
             << "found " + templ.substr(0, templ.size() - 1) + ": "
             << founded
@@ -326,7 +326,7 @@ void takeArguments(int* _kerRadius, double* _sigma, char **_fileName, int _argc,
     std::cout << "argc = " << _argc << std::endl;
     for (int i = 0; i < _argc; i++) {
         std::cout << "argv[" << i << "] = " << _argv[i] << std::endl;
-        size_t argLen = strlen(_argv[i]);
+        // size_t argLen = strlen(_argv[i]);
         std::string argStr = std::string(_argv[i]);
         std::string fileName = findArg(argStr, "file=");
         if (fileName != "") {
@@ -352,7 +352,7 @@ int main(int argc, char* argv[]) {
     int imHeight = IMAGE_HEIGHT;  // image height
     int kerRadius = KERNEL_RADIUS;
     double **kernel = NULL;  // Gauss kernel
-    int matType = 0;
+    // int matType = 0;
     double sigma = DEFAULT_SIGMA;  // filter sigma parameter
     char* fileName = strCpy(DEFAULT_FILE);  // reading file name
 
@@ -361,13 +361,13 @@ int main(int argc, char* argv[]) {
     /* radius 7 */
     int kerRadius7 = 7;
     double **kernel7 = NULL;
-    Pixel **filteredImage7 = NULL;
+    // Pixel **filteredImage7 = NULL;
     // Mat filterMat7;
 
     /* radius 14 */
     int kerRadius14 = 14;
     double **kernel14 = NULL;
-    Pixel **filteredImage14 = NULL;
+    // Pixel **filteredImage14 = NULL;
     // Mat filterMat14;
 
     // for output image
