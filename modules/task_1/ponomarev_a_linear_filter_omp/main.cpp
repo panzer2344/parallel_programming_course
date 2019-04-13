@@ -1,4 +1,4 @@
-﻿// A sequential version of linear filtration algorithm with Gauss kernel
+// A sequential version of linear filtration algorithm with Gauss kernel
 // Copyright 2019 Ponomarev Alexey
 
 #include <stdio.h>
@@ -32,6 +32,9 @@ const char* GENERATED_IMAGE_NAME = "generated image";
 const char* FILTERD_IMAGE_NAME = "generated image";
 const double MATH_PI = 3.14159265359;
 const int KERNEL_RADIUS = 2;
+=======
+// const double MATH_PI = 3.14159265359;
+const int KERNEL_RADIUS = 1;
 const char* KERNEL_NULL_ERROR = "ERROR: kernel is null";
 const char* KERNEL_ROW_NULL_ERROR = "ERROR: nullable kernel row#";
 const char* ALLOCATING_IMAGE_MEMORY_ERROR = "ERROR: error with allocating memory for image";
@@ -39,6 +42,7 @@ const char* IMAGE_NULL_ERROR = "ERROR: image is null";
 const double DEFAULT_SIGMA = 1;
 //const char* DEFAULT_FILE = "azamat.jpg";
 const char* DEFAULT_FILE = "lines.jpg";
+const double DEFAULT_SIGMA = 0.5;
 
 struct Pixel {
     int r;
@@ -89,6 +93,9 @@ double** generateGaussKernel(int radius, double sigma = DEFAULT_SIGMA) {
     double k = 2 * radius * radius;
     double k_pi = MATH_PI * k;
     //double k_pi_norm = sqrt(2 * MATH_PI) * sigma;
+    double squreSigma = sigma * sigma;
+    double doulbeSquereSigma = squreSigma * 2;
+    // double k = MATH_PI * squreSigma;
     double norm = 0.0;
 
     /* summ processing */
@@ -101,6 +108,8 @@ double** generateGaussKernel(int radius, double sigma = DEFAULT_SIGMA) {
             kernel[u + radius][v + radius] /= k_pi;
             //kernel[u + radius][v + radius] /= k_pi_norm;
             //norm += kernel[u + radius][v + radius];
+            kernel[u + radius][v + radius] = exp(-(u * u + v * v) / doulbeSquereSigma);
+            norm += kernel[u + radius][v + radius];
         }
     }
 
@@ -111,6 +120,11 @@ double** generateGaussKernel(int radius, double sigma = DEFAULT_SIGMA) {
         }
     }*/
     /* there are no normalizing now couse there are other formula for gauss filtering */
+    for (int u = -radius; u <= radius; u++) {
+        for (int v = -radius; v <= radius; v++) {
+            kernel[u + radius][v + radius] /= norm;
+        }
+    }
     return kernel;
 }
 
@@ -156,6 +170,7 @@ int clamp(int x, int max = 255, int min = 0) {
         (x < min) ? min : x;
 }
 
+
 // filter for one pixel
 Pixel seqPixelFiltering(Pixel** genImage, int width, int height, double** kernel, int kerRadius, int x, int y) {
     Pixel outPixel;
@@ -188,6 +203,11 @@ Pixel seqPixelFiltering(Pixel** genImage, int width, int height, double** kernel
     /*for (int u = -kerRadius; u <= kerRadius; u++) {
         for (int v = -kerRadius; v <= kerRadius; v++) {
             if (x + v >= 0 && x + v < width && y + u >= 0 && y + u < height) {
+
+    for (int u = -kerRadius; u <= kerRadius; u++) {
+        for (int v = -kerRadius; v <= kerRadius; v++) {
+            if (x + v >= 0 && x + v < width && y + u >= 0 && y + u < height) {
+
                 outPixel.r += static_cast<int>(kernel[u + kerRadius][v + kerRadius] *
                     static_cast<double>(genImage[y + u][x + v].r));
                 outPixel.g += static_cast<int>(kernel[u + kerRadius][v + kerRadius] *
@@ -196,7 +216,10 @@ Pixel seqPixelFiltering(Pixel** genImage, int width, int height, double** kernel
                     static_cast<double>(genImage[y + u][x + v].b));
             }
         }
+
     }*/
+
+    }
 
     return outPixel;
 }
@@ -381,7 +404,6 @@ void takeArguments(int& _kerRadius, double& _sigma, char **_fileName, int _argc,
     }
 }
 
-
 /* entry point */
 int main(int argc, char* argv[]) {
     // define variables
@@ -411,7 +433,6 @@ int main(int argc, char* argv[]) {
 
     // for output image
     // Mat imageMat, filterMat;
-    
 
     /* initialize random seed: */
     srand(static_cast<int>(time(NULL)));
@@ -475,6 +496,18 @@ int main(int argc, char* argv[]) {
 
     // cvWaitKey(0);
     
+  /* genImage = generateImage(imWidth, imHeight);
+    printImage(genImage, imWidth, imHeight);
+
+    kernel = generateGaussKernel(kerRadius);
+    printKernel(kernel, kerRadius);
+
+    filteredImage = seqFilter(genImage, imWidth, imHeight, kernel, kerRadius);
+    printImage(filteredImage, imWidth, imHeight);
+
+    tryDeleteImage(imHeight, genImage, GENERATED_IMAGE_NAME);
+    tryDeleteImage(imHeight, filteredImage, FILTERD_IMAGE_NAME);
+    tryDeleteKernel(kerRadius, kernel); */
     return 0;
 }
 
