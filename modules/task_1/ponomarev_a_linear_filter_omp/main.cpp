@@ -316,7 +316,7 @@ std::string findArg(const std::string& argStr, const std::string& templ) {
 char* strCpy(const char* s) {
     size_t size = strlen(s);
     char* s1 = new char[size];
-    for (int i = 0; i < size; i++) {
+    for (size_t i = 0; i < size; i++) {
         s1[i] = s[i];
     }
     return s1;
