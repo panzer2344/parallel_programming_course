@@ -37,7 +37,7 @@ const char* KERNEL_ROW_NULL_ERROR = "ERROR: nullable kernel row#";
 const char* ALLOCATING_IMAGE_MEMORY_ERROR = "ERROR: error with allocating memory for image";
 const char* IMAGE_NULL_ERROR = "ERROR: image is null";
 const double DEFAULT_SIGMA = 1;
-//const char* DEFAULT_FILE = "azamat.jpg";
+// const char* DEFAULT_FILE = "azamat.jpg";
 const char* DEFAULT_FILE = "lines.jpg";
 
 struct Pixel {
@@ -277,8 +277,8 @@ void printKernel(double **kernel, int radius) {
 //        }
 //    }
 //    return image;
-//}
-//
+// }
+// 
 // Mat matFromPixelArray(Pixel** image, int width, int height, unsigned int type) {
 //    Mat mat = Mat(height, width, type);
 //    for (int y = 0; y < height; y++) {
@@ -292,14 +292,14 @@ void printKernel(double **kernel, int radius) {
 //        }
 //    }
 //    return mat;
-//} 
-//
-//
-//// cvShow
+// } 
+// 
+// 
+// // cvShow
 // void cvShow(const char* window_name, const Mat& image) {
 //    namedWindow(window_name, CV_WINDOW_AUTOSIZE);
 //    imshow(window_name, image);
-//} 
+// } 
 
 std::string findArg(const std::string& argStr, const std::string& templ) {
     size_t from = argStr.find(templ);
