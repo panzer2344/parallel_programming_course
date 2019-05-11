@@ -202,7 +202,7 @@ Pixel** seqFilter(Pixel** genImage, int width, int height, double** kernel, int 
 class Filter {
     Pixel** inputImage;
     Pixel** outputImage;
-	double** kernel;
+    double** kernel;
     const int width, height;
     const int kerRadius;
 
