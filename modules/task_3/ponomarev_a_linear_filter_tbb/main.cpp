@@ -202,8 +202,8 @@ Pixel** seqFilter(Pixel** genImage, int width, int height, double** kernel, int 
 class Filter {
     Pixel** inputImage;
     Pixel** outputImage;
+	double** kernel;
     const int width, height;
-    double** kernel;
     const int kerRadius;
 
  public:
@@ -447,7 +447,7 @@ int main(int argc, char* argv[]) {
     int imHeight = IMAGE_HEIGHT;  // image height
     int kerRadius = KERNEL_RADIUS;
     double** kernel = NULL;  // Gauss kernel
-    int matType = 0;
+    // int matType = 0;
     double sigma = DEFAULT_SIGMA;  // filter sigma parameter
     char* fileName = strCpy(DEFAULT_FILE);  // reading file name
     int threadsNumber = MY_THREADS_NUMBER;
@@ -506,7 +506,7 @@ int main(int argc, char* argv[]) {
 
     std::cout << "Started seq version" << std::endl;
     const clock_t startTimeSeq = clock();
-    filteredImage = seqFilter(genImage, imWidth, imHeight, kernel, kerRadius);
+    seqFilter(genImage, imWidth, imHeight, kernel, kerRadius);
     const clock_t endTimeSeq = clock();
     const float seqTime = static_cast<float>(endTimeSeq - startTimeSeq) / CLOCKS_PER_SEC;
     std::cout << "Elapsed time for seq version = " << seqTime << std::endl;
@@ -514,7 +514,7 @@ int main(int argc, char* argv[]) {
 
     std::cout << "Started par version" << std::endl;
     const clock_t startTimeParallel = clock();
-    filteredImagePar = parFilter(genImage, imWidth, imHeight, kernel, kerRadius, 8);
+    parFilter(genImage, imWidth, imHeight, kernel, kerRadius, 8);
     const clock_t endParTime = clock();
     const float parTime = static_cast<float>(endParTime - startTimeParallel) / CLOCKS_PER_SEC;
     std::cout << "Elapsed time for parallel version = " << parTime << std::endl;
@@ -547,6 +547,7 @@ int main(int argc, char* argv[]) {
     /* deleting main image */
     tryDeleteImage(imHeight, genImage, GENERATED_IMAGE_NAME);
     tryDeleteImage(imHeight, filteredImage, FILTERD_IMAGE_NAME);
+    tryDeleteImage(imHeight, filteredImagePar, FILTERD_IMAGE_NAME);
 
     /* deleting extensional images*/
     //  tryDeleteImage(
