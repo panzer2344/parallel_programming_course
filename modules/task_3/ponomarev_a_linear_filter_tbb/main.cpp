@@ -25,10 +25,10 @@
 // for image output
 // #include <opencv2\imgcodecs.hpp>
 
-// #include <opencv\cv.hpp>
-// #include <opencv2/core/core.hpp>
-// #include <opencv2/highgui/highgui.hpp>
-// using namespace cv;
+ #include <opencv\cv.hpp>
+ #include <opencv2/core/core.hpp>
+ #include <opencv2/highgui/highgui.hpp>
+ using namespace cv;
 
 
 // constants
@@ -48,7 +48,7 @@ const double DEFAULT_SIGMA = 1;
 // const char* DEFAULT_FILE = "azamat.jpg";
 // const char* DEFAULT_FILE = "lines.jpg";
 const char* DEFAULT_FILE = "D:\\Git\\parallel_programming_course\\big_image.jpg";
-const int MY_THREADS_NUMBER = 4;
+const int MY_THREADS_NUMBER = 8;
 
 // using namespace tbb;
 
@@ -339,7 +339,7 @@ void printKernel(double **kernel, int radius) {
     std::cout << std::endl;
 }
 
-/*
+
 Pixel** pixelArrayFromMat(const Mat& mat) {
 std::cout << "start" << std::endl;
 Pixel** image = allocateImageMemory(mat.cols, mat.rows);
@@ -372,9 +372,9 @@ mat.at<Vec3b>(y, x) = vecPixel;
 }
 }
 return mat;
-} */
+} 
 
-/*
+
 
 // cvShow
 void cvShow(const char* window_name, const Mat& image) {
@@ -386,7 +386,7 @@ namedWindow(window_name, CV_WINDOW_AUTOSIZE);
 imshow(window_name, resizedImage);
 }
 
-*/
+
 
 std::string findArg(const std::string& argStr, const std::string& templ) {
     size_t from = argStr.find(templ);
@@ -467,9 +467,9 @@ int main(int argc, char* argv[]) {
     // Mat filterMat14;
 
     // for output image
-    /* Mat imageMat, filterMat;
+     Mat imageMat, filterMat;
     Mat filterMatPar;
-    */
+    
 
     tbb::task_scheduler_init init(threadsNumber);
 
@@ -480,19 +480,19 @@ int main(int argc, char* argv[]) {
     sigma = DEFAULT_SIGMA;  // for tests
     kerRadius = KERNEL_RADIUS;  // for tests
 
-                                /*
-                                imageMat = cvarrToMat(cvLoadImage(DEFAULT_FILE, CV_LOAD_IMAGE_COLOR));
-                                matType = imageMat.type();
-                                imWidth = imageMat.cols;
-                                imHeight = imageMat.rows;
+                                
+    imageMat = cvarrToMat(cvLoadImage(DEFAULT_FILE, CV_LOAD_IMAGE_COLOR));
+    matType = imageMat.type();
+    imWidth = imageMat.cols;
+    imHeight = imageMat.rows;
 
-                                cvShow("image", imageMat);
-                                // cvWaitKey(0);
+    cvShow("image", imageMat);
+    // cvWaitKey(0);
 
-                                genImage = pixelArrayFromMat(imageMat);
-                                */
-    std::cout << "Generating image" << std::endl;
-    genImage = generateImage(imWidth, imHeight);
+    genImage = pixelArrayFromMat(imageMat);
+                                
+    //std::cout << "Generating image" << std::endl;
+    //genImage = generateImage(imWidth, imHeight);
 
     std::cout << "Generating kernel" << std::endl;
     kernel = generateGaussKernel(kerRadius, sigma);
@@ -510,7 +510,7 @@ int main(int argc, char* argv[]) {
     const clock_t endTimeSeq = clock();
     const float seqTime = static_cast<float>(endTimeSeq - startTimeSeq) / CLOCKS_PER_SEC;
     std::cout << "Elapsed time for seq version = " << seqTime << std::endl;
-    // filterMat = matFromPixelArray(filteredImage, imWidth, imHeight, matType);
+    filterMat = matFromPixelArray(filteredImage, imWidth, imHeight, matType);
 
     std::cout << "Started par version" << std::endl;
     const clock_t startTimeParallel = clock();
@@ -518,7 +518,7 @@ int main(int argc, char* argv[]) {
     const clock_t endParTime = clock();
     const float parTime = static_cast<float>(endParTime - startTimeParallel) / CLOCKS_PER_SEC;
     std::cout << "Elapsed time for parallel version = " << parTime << std::endl;
-    // filterMatPar = matFromPixelArray(filteredImagePar, imWidth, imHeight, matType);
+    filterMatPar = matFromPixelArray(filteredImagePar, imWidth, imHeight, matType);
 
     double boost = seqTime / parTime;
     double effectivity = boost / threadsNumber;
@@ -532,10 +532,10 @@ int main(int argc, char* argv[]) {
     // filteredImage14 = seqFilter(genImage, imWidth, imHeight, kernel14, kerRadius14);
     // filterMat14 = matFromPixelArray(filteredImage14, imWidth, imHeight, matType);
 
-    // cvShow("sequence filtered( radius=" + kerRadius, filterMat);
+    cvShow("sequence filtered( radius=" + kerRadius, filterMat);
     // cvWaitKey(0);
 
-    // cvShow("parallel filtered( radius=" + kerRadius, filterMatPar);
+    cvShow("parallel filtered( radius=" + kerRadius, filterMatPar);
     // cvWaitKey(0);
 
     // cvShow("filtered(radius=" + kerRadius7, filterMat7);
@@ -567,7 +567,7 @@ int main(int argc, char* argv[]) {
     // tryDeleteKernel(kerRadius7, kernel7);  // radius 7
     // tryDeleteKernel(kerRadius14, kernel14);  // radius 14
 
-    // cvWaitKey(0);
+    cvWaitKey(0);
 
     // system("pause");
 
